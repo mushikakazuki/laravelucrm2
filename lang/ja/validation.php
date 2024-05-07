@@ -382,6 +382,13 @@ return [
         'is_visible' => '表示',
         'item_name' => '項目名',
         'sort' => '並び順',
+        'kana' => 'カナ',
+        'tel' => '電話番号',
+        'email' => 'メールアドレス',
+        'postcode' => '郵便番号',
+        'address' => '住所',
+        'birthday' => '誕生日',
+        'gender' => '性別'
     ],
 
 ];

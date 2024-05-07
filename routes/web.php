@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -37,7 +38,9 @@ Route::get('/inertia/show/{id}', [InertiaTestController::class, 'show'])->name('
 Route::post('/inertia/store', [InertiaTestController::class, 'store'])->name('inertia.store');
 Route::delete('/inertia/{id}', [InertiaTestController::class, 'delete'])->name('inertia.delete');
 
-Route::resource('/items', ItemController::class)->middleware(['auth','verified']);
+Route::resource('items', ItemController::class)->middleware(['auth','verified']);
+
+Route::resource('custmoer', CustomerController::class)->middleware(['auth', 'verified']);
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');

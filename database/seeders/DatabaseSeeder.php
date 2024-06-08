@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
         \App\Models\Purchase::factory(100)->create();
         
         $items = \App\Models\Item::all();
-        \App\Models\Purchase::factory(100)->create()
+        \App\Models\Purchase::factory(30000)->create()
         ->each(function($purchase) use ($items){
             $purchase->items()->attach(
                 $items->random(rand(1,3))->pluck('id')->toArray(),

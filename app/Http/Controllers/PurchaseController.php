@@ -91,7 +91,7 @@ class PurchaseController extends Controller
         // 合計
         $order = Order::groupBy('id')->where('id', $purchase->id)->selectRaw('id, sum(subtotal) as total, customer_name, status, created_at')->get();
 
-        dd($item, $order);
+        // dd($item, $order);
     }
 
     /**

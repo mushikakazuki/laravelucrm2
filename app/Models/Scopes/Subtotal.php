@@ -27,6 +27,7 @@ class Subtotal implements Scope
         , purchases.status
         , purchases.created_at
         , purchases.updated_at
+        , purchases.customer_id
         from purchases
         left join item_purchase on purchases.id = item_purchase.purchase_id
         left join items on item_purchase.item_id = items.id

@@ -1,23 +1,12 @@
 <?php
+namespace App\Services;
 
-namespace App\Http\Controllers;
-
-
-use Illuminate\Http\Request;
-use App\Models\Order;
 use Illuminate\Support\Facades\DB;
-use Inertia\Inertia;
 
-class AnalysisController extends Controller
-{
-    public function index() {
-
-        // 期間指定
-        $startDate = '2023-06-10'; $endDate = '2024-06-10';
-
+class RFMService {
+    public static function rfm($subQuery, $rfmPrms) {
         // 1. 購買ID毎にまとめる
-        $subQuery = Order::betweenDate($startDate,$endDate)
-        ->groupBy('id')
+        $subQuery = $subQuery->groupBy('id')
         ->selectRaw('id, customer_id,
         customer_name, SUM(subtotal) as
         totalPerPurchase, created_at');
@@ -31,32 +20,30 @@ class AnalysisController extends Controller
         count(customer_id) as frequency,
         sum(totalPerPurchase) as monetary');
 
-        // 4. 会員毎のRFMランクを計算
-        $rfmPrms = [
-            14, 28, 60, 90, 7, 5, 3, 2, 300000, 200000, 100000,
-            30000 ];
-
         $subQuery = DB::table($subQuery)
         ->selectRaw('customer_id, customer_name,
         recentDate, recency, frequency, monetary,
         case
-        when recency < ? then 5
-        when recency < ? then 4
-        when recency < ? then 3
-        when recency < ? then 2
-        else 1 end as r,
+            when recency < ? then 5
+            when recency < ? then 4
+            when recency < ? then 3
+            when recency < ? then 2
+            else 1 end as r,
         case
-        when ? <= frequency then 5
-        when ? <= frequency then 4
-        when ? <= frequency then 3
-        when ? <= frequency then 2
-        else 1 end as f,
+            when ? <= frequency then 5
+            when ? <= frequency then 4
+            when ? <= frequency then 3
+            when ? <= frequency then 2
+            else 1 end as f,
         case
-        when ? <= monetary then 5
-        when ? <= monetary then 4
-        when ? <= monetary then 3
-        when ? <= monetary then 2
-        else 1 end as m', $rfmPrms);
+            when ? <= monetary then 5
+            when ? <= monetary then 4
+            when ? <= monetary then 3
+            when ? <= monetary then 2
+            else 1 end as m',
+        $rfmPrms);
+
+        $totals = DB::table($subQuery)->count();
 
         // 5.ランク毎の数を計算する
         $rCount = DB::table($subQuery)
@@ -79,9 +66,9 @@ class AnalysisController extends Controller
         $rank = 5; // 初期値5
         for($i = 0; $i < 5; $i++)
         {
-        array_push($eachCount, [
-        'rank' => $rank, 'r' => $rCount[$i], 'f' => $fCount[$i], 'm' => $mCount[$i], ]);
-        $rank--; // rankを1ずつ減らす
+            array_push($eachCount, [
+            'rank' => $rank, 'r' => $rCount[$i] ?? 0, 'f' => $fCount[$i] ?? 0, 'm' => $mCount[$i] ?? 0, ]);
+            $rank--; // rankを1ずつ減らす
         }
 
         // 6. RとFで2次元で表示
@@ -96,6 +83,6 @@ class AnalysisController extends Controller
         ->orderBy('rRank', 'desc')
         ->get();
 
-        return Inertia::render('Analysis');
+        return [$data, $totals, $eachCount];
     }
 }
